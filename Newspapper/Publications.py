@@ -1,4 +1,3 @@
-import datetime
 from datetime import date, datetime
 
 class Publication:
@@ -35,7 +34,8 @@ class Horoscope(Publication):
 
 
 class UserInput:
-    def request_type_of_publication_from_user(self):
+    @staticmethod
+    def request_type_of_publication_from_user():
         publication_id = input("Enter publication_id: 1 - for new article, 2 - for new advertisement, 3 - for new horoscope: ")
         if publication_id == '1':
             article_title = input("Enter article title: ")
@@ -55,13 +55,14 @@ class UserInput:
         else:
             print("Please enter a valid input")
 
-class Publish:
-    def publish_to_file(self, text):
+class Publisher:
+    @staticmethod
+    def publish_to_file(text):
         with open('Newspapper.txt', 'a', encoding='utf-8') as f:
             print(text, file=f)
 
 
-b = UserInput().request_type_of_publication_from_user()
+b = UserInput.request_type_of_publication_from_user()
 
-Publish().publish_to_file(b)
+Publisher.publish_to_file(b)
 
