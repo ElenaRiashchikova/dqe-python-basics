@@ -122,7 +122,7 @@ class UserInputByFile:
                 elif publication_id == '2':
                     adverts_list:list = []
                     adverts_lines:list = []
-                    for line in lines:
+                    for line in fully_fixed_case_text.splitlines():
                         if line == '\n' or line == '':
                             today_date = date.today()
                             formatted_date = datetime.strptime(adverts_lines[1].strip(), "%Y-%m-%d").date()
@@ -133,10 +133,9 @@ class UserInputByFile:
                             adverts_lines.append(line.strip())
                     return  adverts_list
                 elif publication_id == '3':
-                    print(lines)
                     horoscope_list:list = []
                     horoscope_lines:list = []
-                    for line in lines:
+                    for line in fully_fixed_case_text.splitlines():
                         if line == '\n' or line == '':
                             horoscope_list.append(Horoscope(horoscope_lines[0], horoscope_lines[1]))
                             horoscope_lines.clear()
