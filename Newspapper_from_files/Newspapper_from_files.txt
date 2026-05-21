@@ -1,10 +1,17 @@
 News Article
-Virgo
-All is good
+Good News!
+Budapest
 Publication date: 2026-05-21
 
-News Article
+Advertisement
+Book flight tickets!
+Advert is valid for: 48 days
+
+Horoscope
+Virgo
+All is good
+
+Horoscope
 Leo
 All is perfect
-Publication date: 2026-05-21
 

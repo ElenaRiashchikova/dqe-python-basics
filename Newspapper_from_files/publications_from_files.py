@@ -1,8 +1,6 @@
 from datetime import date, datetime
 from pathlib import Path
 import os
-
-import normalize_text_func
 from normalize_text_func import make_text_lower_case, split_text_into_sentences, capitalize_sentences, replace_with_capitalized_sentences
 
 class Publication:
@@ -55,7 +53,6 @@ class UserInputSourceOfPublication():
             path_to_file = input("Enter path to file or 'default' if file is in default folder: ")
             if path_to_file == 'default':
                 b = UserInputByFile().get_file_for_publication_from_user('Publication_text_to_print.txt')
-                print(b)
                 for i in b:
                     Publisher.publish_to_file(i)
                 os.remove('Publication_text_to_print.txt')
@@ -106,7 +103,6 @@ class UserInputByFile:
                 fully_fixed_case_text = replace_with_capitalized_sentences(lower_case_only_text,
                                                                            capitalize_sentences_list,
                                                                            lower_case_sentences)
-                print(fully_fixed_case_text)
                 publication_id = UserInputTypeOfPublication().request_type_of_publication_from_user()
                 if publication_id == '1':
                     news_articles_list:list = []
