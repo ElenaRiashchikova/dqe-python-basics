@@ -2,6 +2,7 @@ from datetime import date, datetime
 from pathlib import Path
 import os
 from normalize_text_func import make_text_lower_case, split_text_into_sentences, capitalize_sentences, replace_with_capitalized_sentences
+import subprocess
 
 class Publication:
     def __init__(self, name):
@@ -145,9 +146,10 @@ class UserInputByFile:
 class Publisher:
     @staticmethod
     def publish_to_file(text):
-        with open('Newspapper_from_files.txt', 'a', encoding='utf-8') as f:
+        with open('Newspaper_from_files.txt', 'a', encoding='utf-8') as f:
             print(text, file=f)
 
 
 UserInputSourceOfPublication().request_source_of_publication()
 
+subprocess.run(["python", "words_and_letters_calculation.py"])
