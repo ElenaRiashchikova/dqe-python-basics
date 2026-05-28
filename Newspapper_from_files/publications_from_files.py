@@ -3,6 +3,7 @@ from pathlib import Path
 import os
 from normalize_text_func import make_text_lower_case, split_text_into_sentences, capitalize_sentences, replace_with_capitalized_sentences
 import subprocess
+import json
 
 class Publication:
     def __init__(self, name):
@@ -46,22 +47,32 @@ class Horoscope(Publication):
 class UserInputSourceOfPublication():
     @staticmethod
     def request_source_of_publication():
-        input_type = input("Enter type of publication input 'file' or 'text': ")
+        input_type = input("Enter type of publication input 'text file', 'json file' or 'text': ")
         if input_type == 'text':
             a = UserInputManual().get_text_of_publication_from_user()
             Publisher.publish_to_file(a)
-        elif input_type == 'file':
+        elif input_type == 'text file' or 'json file':
             path_to_file = input("Enter path to file or 'default' if file is in default folder: ")
-            if path_to_file == 'default':
-                b = UserInputByFile().get_file_for_publication_from_user('Publication_text_to_print.txt')
-                for i in b:
-                    Publisher.publish_to_file(i)
-                os.remove('Publication_text_to_print.txt')
-            elif path_to_file != 'file':
-                b = UserInputByFile().get_file_for_publication_from_user(Path(path_to_file))
-                for i in b:
-                    Publisher.publish_to_file(i)
-                os.remove(path_to_file)
+            if input_type == 'text file':
+                if path_to_file == 'default':
+                    b = UserInputByFile().get_file_for_publication_from_user('Publication_text_to_print.txt')
+                    for i in b:
+                        Publisher.publish_to_file(i)
+                    os.remove('Publication_text_to_print.txt')
+                else:
+                    b = UserInputByFile().get_file_for_publication_from_user(Path(path_to_file))
+                    for i in b:
+                        Publisher.publish_to_file(i)
+                    os.remove(path_to_file)
+            elif input_type == 'json file':
+                if path_to_file == 'default':
+                    b = UserInputByJson().get_json_file_for_publication_from_user('Publication_JSON_to_print.json')
+                    Publisher.publish_to_file(b)
+                    os.remove('Publication_JSON_to_print.json')
+                else:
+                    b = UserInputByJson().get_json_file_for_publication_from_user(Path(path_to_file))
+                    Publisher.publish_to_file(b)
+                    os.remove(path_to_file)
         else:
             print("Please enter a valid input")
 
@@ -141,6 +152,25 @@ class UserInputByFile:
                     return horoscope_list
                 else:
                     print("Please enter a valid input")
+
+class UserInputByJson:
+    @staticmethod
+    def get_json_file_for_publication_from_user(path_to_file):
+        with open(path_to_file, 'r', encoding='utf-8') as file_text:
+            publication_dict = json.load(file_text)
+            print(publication_dict)
+            publication_type = publication_dict["publication_type"]
+            if publication_type == 'NewsArticle':
+                return NewsArticle(publication_dict["article_title"], publication_dict["city"], date.today())
+            elif publication_type == 'Advert':
+                today_date = date.today()
+                formatted_date = datetime.strptime(publication_dict["end_date"], "%Y-%m-%d").date()
+                date_difference = formatted_date - today_date
+                return Advertisement(publication_dict["advert_text"], publication_dict["end_date"], date_difference.days)
+            elif publication_type == 'Horoscope':
+                return Horoscope(publication_dict["sign"], publication_dict["horoscope_text"])
+            else:
+                print("Please enter a valid input")
 
 
 class Publisher:
