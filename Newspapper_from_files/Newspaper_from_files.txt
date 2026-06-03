@@ -56,3 +56,17 @@ Horoscope
 Leo
 You are a star
 
+
+News Article
+Good news!
+Boston
+Publication date: 2026-06-03
+
+Advertisement
+Book now!
+Advert is valid for: 34 days
+
+Horoscope
+Virgo
+Best day
+

@@ -4,6 +4,8 @@ import os
 from normalize_text_func import make_text_lower_case, split_text_into_sentences, capitalize_sentences, replace_with_capitalized_sentences
 import subprocess
 import json
+import xml.etree.ElementTree as ET
+
 
 class Publication:
     def __init__(self, name):
@@ -44,10 +46,10 @@ class Horoscope(Publication):
         return self.name + "\n" + self.sign + "\n" + self.horoscope_text + "\n"
 
 
-class UserInputSourceOfPublication():
+class UserInputSourceOfPublication:
     @staticmethod
     def request_source_of_publication():
-        input_type = input("Enter type of publication input 'text file', 'json file' or 'text': ")
+        input_type = input("Enter type of publication input 'text file', 'json file', 'xml file' or 'text': ")
         if input_type == 'text':
             a = UserInputManual().get_text_of_publication_from_user()
             Publisher.publish_to_file(a)
@@ -56,33 +58,65 @@ class UserInputSourceOfPublication():
             if input_type == 'text file':
                 if path_to_file == 'default':
                     b = UserInputByFile().get_file_for_publication_from_user('Publication_text_to_print.txt')
-                    for i in b:
-                        Publisher.publish_to_file(i)
-                    os.remove('Publication_text_to_print.txt')
+                    if b is not None:
+                        for i in b:
+                            Publisher.publish_to_file(i)
+                            os.remove('Publication_text_to_print.txt')
+                    else:
+                        pass
                 else:
                     b = UserInputByFile().get_file_for_publication_from_user(Path(path_to_file))
-                    for i in b:
-                        Publisher.publish_to_file(i)
-                    os.remove(path_to_file)
+                    if b is not None:
+                        for i in b:
+                            Publisher.publish_to_file(i)
+                        os.remove(path_to_file)
             elif input_type == 'json file':
                 if path_to_file == 'default':
                     b = UserInputByJson().get_json_file_for_publication_from_user('Publication_JSON_to_print.json')
-                    Publisher.publish_to_file(b)
-                    os.remove('Publication_JSON_to_print.json')
+                    if b is not None:
+                        Publisher.publish_to_file(b)
+                        try:
+                            os.remove('Publication_JSON_to_print.json')
+                        except:
+                            pass
                 else:
                     b = UserInputByJson().get_json_file_for_publication_from_user(Path(path_to_file))
-                    Publisher.publish_to_file(b)
-                    os.remove(path_to_file)
+                    if b is not None:
+                        Publisher.publish_to_file(b)
+                        try:
+                            os.remove(path_to_file)
+                        except:
+                            pass
+            elif input_type == 'xml file':
+                if path_to_file == 'default':
+                    b = UserInputByXml().get_xml_file_for_publication_from_user('XML_for_publication.xml')
+                    if b is not None:
+                        for i in b:
+                            Publisher.publish_to_file(i)
+                        try:
+                            os.remove('XML_for_publication.xml')
+                        except:
+                            pass
+                    else:
+                        pass
+                else:
+                    b = UserInputByXml().get_json_file_for_publication_from_user(Path(path_to_file))
+                    if b is not None:
+                        Publisher.publish_to_file(b)
+                        try:
+                            os.remove(path_to_file)
+                        except:
+                            pass
         else:
             print("Please enter a valid input")
 
-class UserInputTypeOfPublication():
+class UserInputTypeOfPublication:
     @staticmethod
     def request_type_of_publication_from_user():
         publication_id = input("Enter publication_id: 1 - for new article, 2 - for new advertisement, 3 - for new horoscope: ")
         return publication_id
 
-class UserInputManual():
+class UserInputManual:
     @staticmethod
     def get_text_of_publication_from_user():
         publication_id = UserInputTypeOfPublication().request_type_of_publication_from_user()
@@ -107,6 +141,7 @@ class UserInputManual():
 class UserInputByFile:
     @staticmethod
     def get_file_for_publication_from_user(path_to_file):
+        try:
             with open(path_to_file, 'r', encoding='utf-8') as file_text:
                 source_text = file_text.read()
                 lower_case_only_text = make_text_lower_case(source_text)
@@ -151,26 +186,58 @@ class UserInputByFile:
                             horoscope_lines.append(line.strip())
                     return horoscope_list
                 else:
-                    print("Please enter a valid input")
+                    print("Please provide valid text")
+        except FileNotFoundError:
+            print("Please provide valid file")
 
 class UserInputByJson:
     @staticmethod
     def get_json_file_for_publication_from_user(path_to_file):
-        with open(path_to_file, 'r', encoding='utf-8') as file_text:
-            publication_dict = json.load(file_text)
-            print(publication_dict)
-            publication_type = publication_dict["publication_type"]
-            if publication_type == 'NewsArticle':
-                return NewsArticle(publication_dict["article_title"], publication_dict["city"], date.today())
-            elif publication_type == 'Advert':
-                today_date = date.today()
-                formatted_date = datetime.strptime(publication_dict["end_date"], "%Y-%m-%d").date()
-                date_difference = formatted_date - today_date
-                return Advertisement(publication_dict["advert_text"], publication_dict["end_date"], date_difference.days)
-            elif publication_type == 'Horoscope':
-                return Horoscope(publication_dict["sign"], publication_dict["horoscope_text"])
-            else:
-                print("Please enter a valid input")
+        try:
+            with open(path_to_file, 'r', encoding='utf-8') as file_text:
+                publication_dict = json.load(file_text)
+                print(publication_dict)
+                publication_type = publication_dict["publication_type"]
+                if publication_type == 'NewsArticle':
+                    return NewsArticle(publication_dict["article_title"], publication_dict["city"], date.today())
+                elif publication_type == 'Advert':
+                    today_date = date.today()
+                    formatted_date = datetime.strptime(publication_dict["end_date"], "%Y-%m-%d").date()
+                    date_difference = formatted_date - today_date
+                    return Advertisement(publication_dict["advert_text"], publication_dict["end_date"], date_difference.days)
+                elif publication_type == 'Horoscope':
+                    return Horoscope(publication_dict["sign"], publication_dict["horoscope_text"])
+                else:
+                    print("Please provide valid text")
+        except FileNotFoundError:
+            print("Please provide valid file")
+
+class UserInputByXml:
+    @staticmethod
+    def get_xml_file_for_publication_from_user(path_to_file):
+        try:
+            with open(path_to_file, 'r', encoding='utf-8') as file_text:
+                xml_file = ET.parse(file_text)
+                root = xml_file.getroot()
+                news_articles_list: list = []
+                for i in root:
+                    if i.tag == 'NewsArticle':
+                        print(root.findtext('NewsArticle/Title'))
+                        news_articles_list.append(NewsArticle(root.findtext('NewsArticle/Title'), root.findtext('NewsArticle/City'), date.today()))
+                    elif i.tag == 'Advert':
+                        today_date = date.today()
+                        formatted_date = datetime.strptime(root.findtext('Advert/End_date'), "%Y-%m-%d").date()
+                        date_difference = formatted_date - today_date
+                        news_articles_list.append(Advertisement(root.findtext('Advert/Text'), root.findtext('Advert/End_date'), date_difference.days))
+                    elif i.tag == 'Horoscope':
+                        news_articles_list.append(Horoscope(root.findtext('Horoscope/Sign'), root.findtext('Horoscope/Text')))
+                    else:
+                        print("Please provide valid text")
+                return news_articles_list
+
+        except FileNotFoundError:
+            print("Please provide valid file")
+
 
 
 class Publisher:
