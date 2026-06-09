@@ -5,13 +5,8 @@ from normalize_text_func import make_text_lower_case, split_text_into_sentences,
 import subprocess
 import json
 import xml.etree.ElementTree as ET
+import pyodbc
 
-
-class Publication:
-    def __init__(self, name):
-        self.name = name
-    def __str__(self):
-        return self.name
 
 class Publication:
     def __init__(self, name):
@@ -25,8 +20,6 @@ class NewsArticle(Publication):
         self.article_title = article_title
         self.city = city
         self.article_date = article_date
-    def __str__(self):
-        return self.name + "\n" + self.article_title + "\n" + self.city + "\n" + "Publication date: " + str(self.article_date) + "\n"
 
 class Advertisement(Publication):
     def __init__(self, ad_text, input_date, days_left):
@@ -34,81 +27,44 @@ class Advertisement(Publication):
         self.ad_text = ad_text
         self.input_date = input_date
         self.days_left = days_left
-    def __str__(self):
-        return self.name + "\n" + self.ad_text + "\n" + "Advert is valid for: " + str(self.days_left) + " days" + "\n"
 
 class Horoscope(Publication):
     def __init__(self, sign, horoscope_text):
         Publication.__init__(self, "Horoscope")
         self.sign = sign
         self.horoscope_text = horoscope_text
-    def __str__(self):
-        return self.name + "\n" + self.sign + "\n" + self.horoscope_text + "\n"
-
 
 class UserInputSourceOfPublication:
     @staticmethod
     def request_source_of_publication():
         input_type = input("Enter type of publication input 'text file', 'json file', 'xml file' or 'text': ")
         if input_type == 'text':
-            a = UserInputManual().get_text_of_publication_from_user()
-            Publisher.publish_to_file(a)
-        elif input_type == 'text file' or 'json file':
-            path_to_file = input("Enter path to file or 'default' if file is in default folder: ")
-            if input_type == 'text file':
-                if path_to_file == 'default':
-                    b = UserInputByFile().get_file_for_publication_from_user('Publication_text_to_print.txt')
-                    if b is not None:
-                        for i in b:
-                            Publisher.publish_to_file(i)
-                            os.remove('Publication_text_to_print.txt')
-                    else:
-                        pass
-                else:
-                    b = UserInputByFile().get_file_for_publication_from_user(Path(path_to_file))
-                    if b is not None:
-                        for i in b:
-                            Publisher.publish_to_file(i)
-                        os.remove(path_to_file)
-            elif input_type == 'json file':
-                if path_to_file == 'default':
-                    b = UserInputByJson().get_json_file_for_publication_from_user('Publication_JSON_to_print.json')
-                    if b is not None:
-                        Publisher.publish_to_file(b)
-                        try:
-                            os.remove('Publication_JSON_to_print.json')
-                        except:
-                            pass
-                else:
-                    b = UserInputByJson().get_json_file_for_publication_from_user(Path(path_to_file))
-                    if b is not None:
-                        Publisher.publish_to_file(b)
-                        try:
-                            os.remove(path_to_file)
-                        except:
-                            pass
-            elif input_type == 'xml file':
-                if path_to_file == 'default':
-                    b = UserInputByXml().get_xml_file_for_publication_from_user('XML_for_publication.xml')
-                    if b is not None:
-                        for i in b:
-                            Publisher.publish_to_file(i)
-                        try:
-                            os.remove('XML_for_publication.xml')
-                        except:
-                            pass
-                    else:
-                        pass
-                else:
-                    b = UserInputByXml().get_json_file_for_publication_from_user(Path(path_to_file))
-                    if b is not None:
-                        Publisher.publish_to_file(b)
-                        try:
-                            os.remove(path_to_file)
-                        except:
-                            pass
+            text_from_input = UserInputManual().get_text_of_publication_from_user()
+            return text_from_input, "No file"
         else:
-            print("Please enter a valid input")
+            path_to_file = input("Enter path to file or file name if file is in default folder: ")
+            if input_type == 'text file':
+                text_from_txt_to_print = UserInputByFile().get_file_for_publication_from_user(path_to_file)
+                if text_from_txt_to_print is not None:
+                    return text_from_txt_to_print, path_to_file
+                else:
+                    print("Publication text is empty")
+
+            elif input_type == 'json file':
+                text_from_json_to_print = UserInputByJson().get_json_file_for_publication_from_user(path_to_file)
+                if text_from_json_to_print is not None:
+                    return text_from_json_to_print, path_to_file
+                else:
+                    print("Publication text is empty")
+
+            elif input_type == 'xml file':
+                text_from_xml_to_print = UserInputByXml().get_xml_file_for_publication_from_user(path_to_file)
+                if text_from_xml_to_print is not None:
+                    return text_from_xml_to_print, path_to_file
+                else:
+                    print("Publication text is empty")
+            else:
+                print("Please enter a valid input")
 
 class UserInputTypeOfPublication:
     @staticmethod
@@ -123,18 +79,24 @@ class UserInputManual:
         if publication_id == '1':
             article_title = input("Enter article title: ")
             city = input("Enter city: ")
-            return NewsArticle(article_title, city, date.today())
+            article_text_to_print:list = []
+            article_text_to_print.append(NewsArticle(article_title, city, date.today()))
+            return article_text_to_print
         elif publication_id == '2':
             ad_text = input("Enter ad title: ")
             input_date = input("Enter end date in format YYYY-MM-DD: ")
             today_date = date.today()
             formatted_date = datetime.strptime(input_date, "%Y-%m-%d").date()
             date_difference = formatted_date - today_date
-            return Advertisement(ad_text, input_date, date_difference.days)
+            advert_to_print:list = []
+            advert_to_print.append(Advertisement(ad_text, input_date, date_difference.days))
+            return advert_to_print
         elif publication_id == '3':
             sign = input("Enter sign: ")
             horoscope_text = input("Enter horoscope text: ")
-            return Horoscope(sign, horoscope_text)
+            horoscope_to_print:list = []
+            horoscope_to_print.append(Horoscope(sign, horoscope_text))
+            return horoscope_to_print
         else:
             print("Please enter a valid input")
 
@@ -152,39 +114,39 @@ class UserInputByFile:
                                                                            lower_case_sentences)
                 publication_id = UserInputTypeOfPublication().request_type_of_publication_from_user()
                 if publication_id == '1':
-                    news_articles_list:list = []
+                    news_articles_list_to_print:list = []
                     news_articles_lines:list = []
                     for line in fully_fixed_case_text.splitlines():
                         print(line)
                         if line == '\n' or line == '':
-                            news_articles_list.append(NewsArticle(news_articles_lines[0], news_articles_lines[1], date.today()))
+                            news_articles_list_to_print.append(NewsArticle(news_articles_lines[0], news_articles_lines[1], date.today()))
                             news_articles_lines.clear()
                         else:
                             news_articles_lines.append(line.strip())
-                    return  news_articles_list
+                    return news_articles_list_to_print
                 elif publication_id == '2':
-                    adverts_list:list = []
+                    adverts_list_to_print:list = []
                     adverts_lines:list = []
                     for line in fully_fixed_case_text.splitlines():
                         if line == '\n' or line == '':
                             today_date = date.today()
                             formatted_date = datetime.strptime(adverts_lines[1].strip(), "%Y-%m-%d").date()
                             date_difference = formatted_date - today_date
-                            adverts_list.append(Advertisement(adverts_lines[0], adverts_lines[1], date_difference.days))
+                            adverts_list_to_print.append(Advertisement(adverts_lines[0], adverts_lines[1], date_difference.days))
                             adverts_lines.clear()
                         else:
                             adverts_lines.append(line.strip())
-                    return  adverts_list
+                    return  adverts_list_to_print
                 elif publication_id == '3':
-                    horoscope_list:list = []
+                    horoscope_list_to_print:list = []
                     horoscope_lines:list = []
                     for line in fully_fixed_case_text.splitlines():
                         if line == '\n' or line == '':
-                            horoscope_list.append(Horoscope(horoscope_lines[0], horoscope_lines[1]))
+                            horoscope_list_to_print.append(Horoscope(horoscope_lines[0], horoscope_lines[1]))
                             horoscope_lines.clear()
                         else:
                             horoscope_lines.append(line.strip())
-                    return horoscope_list
+                    return horoscope_list_to_print
                 else:
                     print("Please provide valid text")
         except FileNotFoundError:
@@ -195,20 +157,24 @@ class UserInputByJson:
     def get_json_file_for_publication_from_user(path_to_file):
         try:
             with open(path_to_file, 'r', encoding='utf-8') as file_text:
-                publication_dict = json.load(file_text)
-                print(publication_dict)
-                publication_type = publication_dict["publication_type"]
-                if publication_type == 'NewsArticle':
-                    return NewsArticle(publication_dict["article_title"], publication_dict["city"], date.today())
-                elif publication_type == 'Advert':
-                    today_date = date.today()
-                    formatted_date = datetime.strptime(publication_dict["end_date"], "%Y-%m-%d").date()
-                    date_difference = formatted_date - today_date
-                    return Advertisement(publication_dict["advert_text"], publication_dict["end_date"], date_difference.days)
-                elif publication_type == 'Horoscope':
-                    return Horoscope(publication_dict["sign"], publication_dict["horoscope_text"])
-                else:
-                    print("Please provide valid text")
+                publications_list = json.load(file_text)
+                print(publications_list)
+                publications_list_to_print: list = []
+                for publication in publications_list:
+                    print(publication)
+                    publication_type = publication["publication_type"]
+                    if publication_type == 'NewsArticle':
+                        publications_list_to_print.append(NewsArticle(publication["article_title"], publication["city"], date.today()))
+                    elif publication_type == 'Advert':
+                        today_date = date.today()
+                        formatted_date = datetime.strptime(publication["end_date"], "%Y-%m-%d").date()
+                        date_difference = formatted_date - today_date
+                        publications_list_to_print.append(Advertisement(publication["advert_text"], publication["end_date"], date_difference.days))
+                    elif publication_type == 'Horoscope':
+                        publications_list_to_print.append(Horoscope(publication["sign"], publication["horoscope_text"]))
+                    else:
+                        print("Please provide valid text")
+                return publications_list_to_print
         except FileNotFoundError:
             print("Please provide valid file")
 
@@ -219,34 +185,79 @@ class UserInputByXml:
             with open(path_to_file, 'r', encoding='utf-8') as file_text:
                 xml_file = ET.parse(file_text)
                 root = xml_file.getroot()
-                news_articles_list: list = []
+                publications_list_to_print: list = []
                 for i in root:
                     if i.tag == 'NewsArticle':
-                        print(root.findtext('NewsArticle/Title'))
-                        news_articles_list.append(NewsArticle(root.findtext('NewsArticle/Title'), root.findtext('NewsArticle/City'), date.today()))
+                        publications_list_to_print.append(NewsArticle(root.findtext('NewsArticle/Title'), root.findtext('NewsArticle/City'), date.today()))
                     elif i.tag == 'Advert':
                         today_date = date.today()
                         formatted_date = datetime.strptime(root.findtext('Advert/End_date'), "%Y-%m-%d").date()
                         date_difference = formatted_date - today_date
-                        news_articles_list.append(Advertisement(root.findtext('Advert/Text'), root.findtext('Advert/End_date'), date_difference.days))
+                        publications_list_to_print.append(Advertisement(root.findtext('Advert/Text'), root.findtext('Advert/End_date'), date_difference.days))
                     elif i.tag == 'Horoscope':
-                        news_articles_list.append(Horoscope(root.findtext('Horoscope/Sign'), root.findtext('Horoscope/Text')))
+                        publications_list_to_print.append(Horoscope(root.findtext('Horoscope/Sign'), root.findtext('Horoscope/Text')))
                     else:
                         print("Please provide valid text")
-                return news_articles_list
-
+                return publications_list_to_print
         except FileNotFoundError:
             print("Please provide valid file")
 
-
-
-class Publisher:
+class PublisherToFile:
     @staticmethod
-    def publish_to_file(text):
+    def publish_to_file(publications):
         with open('Newspaper_from_files.txt', 'a', encoding='utf-8') as f:
-            print(text, file=f)
+            for publication in publications:
+                if publication.__class__.__name__ == 'NewsArticle':
+                    print(publication.name + "\n" + publication.article_title + "\n" + publication.city + "\n" + "Publication date: " + str(publication.article_date) + "\n", file=f)
+                elif publication.__class__.__name__ == 'Advertisement':
+                    print(publication.name + "\n" + publication.ad_text + "\n" + "Advert is valid for: " + str(publication.days_left) + " days" + "\n", file=f)
+                elif publication.__class__.__name__ == 'Horoscope':
+                    print(publication.name + "\n" + publication.sign + "\n" + publication.horoscope_text + "\n", file=f)
+                else:
+                    pass
 
+class PublisherToDb:
+    @staticmethod
+    def publish_to_db(publications):
+        connection = pyodbc.connect(
+            'Driver={SQLite3 ODBC Driver};'
+            'Direct=True;Database=newspaper.db;'
+            'encoding="utf-8";'
+            'String Types=Unicode')
+        cursor = connection.cursor()
+        for publication in publications:
+            if publication.__class__.__name__ == 'NewsArticle':
+                cursor.execute("CREATE TABLE IF NOT EXISTS NewsArticle (article_title varchar(255), article_city varchar(255), article_date date)")
+                cursor.execute("INSERT INTO NewsArticle VALUES (?, ?, ?)", (publication.article_title, publication.city, publication.article_date))
+                connection.commit()
+            elif publication.__class__.__name__ == 'Advertisement':
+                cursor.execute("CREATE TABLE IF NOT EXISTS Advertisement (ad_text varchar(255), days_left varchar(255))")
+                cursor.execute("INSERT INTO Advertisement VALUES (?, ?)", (publication.ad_text, str(publication.days_left)))
+                connection.commit()
+            elif publication.__class__.__name__ == 'Horoscope':
+                cursor.execute("CREATE TABLE IF NOT EXISTS Horoscope (sign varchar(255), horoscope_text varchar(255))")
+                cursor.execute("INSERT INTO Horoscope VALUES (?, ?)", (publication.sign, publication.horoscope_text))
+                connection.commit()
+            else:
+                pass
 
-UserInputSourceOfPublication().request_source_of_publication()
+class SourceFileDecommission:
+    @staticmethod
+    def delete_source_file(path_to_file):
+        if os.path.isfile(path_to_file):
+            try:
+                os.remove(path_to_file)
+            except FileNotFoundError:
+                print("There are no file")
+
+Publication_to_print = UserInputSourceOfPublication().request_source_of_publication()
+
+print(Publication_to_print[0])
+print(Publication_to_print[1])
+
+PublisherToFile.publish_to_file(Publication_to_print[0])
+PublisherToDb.publish_to_db(Publication_to_print[0])
+SourceFileDecommission.delete_source_file(Publication_to_print[1])
+
 
 subprocess.run(["python", "words_and_letters_calculation.py"])

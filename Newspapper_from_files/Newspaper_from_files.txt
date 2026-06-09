@@ -1,70 +1,39 @@
 News Article
-Good News!
+Good news!
 Budapest
-Publication date: 2026-05-21
-
-Advertisement
-Book flight tickets!
-Advert is valid for: 48 days
-
-Horoscope
-Virgo
-All is good
-
-Horoscope
-Leo
-All is perfect
-
-News Article
-Perfect news
-Paris
-Publication date: 2026-05-27
-
-Horoscope
-Cancer
-This day is perfect!
-
-News Article
-There is new concert Today
-New York
-Publication date: 2026-05-27
+Publication date: 2026-06-09
 
 News Article
 Great news!
 Rio
-Publication date: 2026-05-27
+Publication date: 2026-06-09
 
 News Article
 Now or never
 London
-Publication date: 2026-05-27
+Publication date: 2026-06-09
 
 News Article
-New museum opening
+Local Festival Draws Record Crowds
 Budapest
-Publication date: 2026-05-28
+Publication date: 2026-06-09
 
 Advertisement
-Book hotel in Rome
-Advert is valid for: 65 days
+Summer sale — up to 50% off all electronics!
+Advert is valid for: 52 days
 
 Horoscope
-Leo
-You are a star
-
-Horoscope
-Leo
-You are a star
-
+Aries
+A unexpected opportunity will present itself mid-week. Trust your instincts.
 
 News Article
 Good news!
 Boston
-Publication date: 2026-06-03
+Publication date: 2026-06-09
 
 Advertisement
 Book now!
-Advert is valid for: 34 days
+Advert is valid for: 28 days
 
 Horoscope
 Virgo

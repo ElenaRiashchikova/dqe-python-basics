@@ -1,0 +1,17 @@
+[
+  {
+    "publication_type": "NewsArticle",
+    "article_title": "Local Festival Draws Record Crowds",
+    "city": "Budapest"
+  },
+  {
+    "publication_type": "Advert",
+    "advert_text": "Summer sale — up to 50% off all electronics!",
+    "end_date": "2026-07-31"
+  },
+  {
+    "publication_type": "Horoscope",
+    "sign": "Aries",
+    "horoscope_text": "A unexpected opportunity will present itself mid-week. Trust your instincts."
+  }
+]
