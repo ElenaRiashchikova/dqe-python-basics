@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from pathlib import Path
 import os
 from normalize_text_func import make_text_lower_case, split_text_into_sentences, capitalize_sentences, replace_with_capitalized_sentences
 import subprocess
